@@ -28,3 +28,15 @@ class TestUserRegisterView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.failIf(response.context['form'].is_valid())
         self.assertFormError(form=response.context['form'], field='email', errors=['Enter a valid email address.'])
+
+
+class TestWritersView(TestCase):
+    def setUp(self):
+        User.objects.create_user(username='username', email='email@gmail.com', password='password')
+        self.client = Client()
+        self.client.login(username='username', email='email@gmail.com', password='password')
+
+    def test_writers_GET(self):
+        response = self.client.get(reverse('home:writers'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'home/writers.html')
