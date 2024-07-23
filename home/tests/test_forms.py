@@ -5,8 +5,12 @@ from home import forms
 
 
 class TestRegistrationForm(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        User.objects.create_user(username='username', email='email@gmail.com', password='password')
+
     def test_valid_data(self):
-        data = {'username': 'abolfazl', 'email': 'abolfazl@gamil.com', 'password': 'testpass', 'password2': 'testpass'}
+        data = {'username': 'abolfazl', 'email': 'abolfazl@gamil.com', 'password': 'password', 'password2': 'password'}
         form = forms.RegisterForm(data=data)
         self.assertTrue(form.is_valid())
 
@@ -16,20 +20,19 @@ class TestRegistrationForm(TestCase):
         self.assertFalse(form.is_valid())
 
     def test_invalid_email(self):
-        User.objects.create_user(username='abolfazl', email='test@gmail.com', password='<PASSWORD>')
-        data = {'username': 'test', 'email': 'test@gmail.com', 'password': 'testpass', 'password2': 'testpass'}
+        data = {'username': 'test', 'email': 'email@gmail.com', 'password': 'password', 'password2': 'password'}
         form = forms.RegisterForm(data=data)
+        self.assertEqual(len(form.errors), 1)
         self.assertTrue(form.has_error('email'))
 
     def test_invalid_username(self):
-        User.objects.create_user(username='test', email='test@gmail.com', password='<PASSWORD>')
-        data = {'username': 'test', 'email': 'abolfazl@gmail.com', 'password': 'testpass', 'password2': 'testpass'}
+        data = {'username': 'username', 'email': 'abolfazl@gmail.com', 'password': 'password', 'password2': 'password'}
         form = forms.RegisterForm(data=data)
         self.assertEqual(len(form.errors), 1)
         self.assertTrue(form.has_error('username'))
 
     def test_invalid_password(self):
-        data = {'username': 'abolfazl', 'email': 'abolfazl@gamil.com', 'password': 'pass', 'password2': 'testpass'}
+        data = {'username': 'abolfazl', 'email': 'abolfazl@gamil.com', 'password': 'pass', 'password2': 'password'}
         form = forms.RegisterForm(data=data)
         self.assertEqual(len(form.errors), 1)
         self.assertTrue(form.has_error)
