@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
 from django.views import View
@@ -15,7 +16,7 @@ class HomeView(View):
 
 class UserRegisterView(View):
     form_class = RegisterForm
-    template_name = 'users/register.html'
+    template_name = 'home/register.html'
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -46,6 +47,6 @@ class WriterListView(View):
         return render(request, 'home/writers.html', {"writers": writers})
 
 
-class AboutView(View):
+class AboutView(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, 'home/home.html')
