@@ -1,0 +1,7 @@
+{% extends 'parent/base.html' %}
+
+{% block content %}
+    {% for writer in writers %}
+        <p>{{ writer }}</p>
+    {% endfor %}
+{% endblock %}
