@@ -12,6 +12,7 @@ class BaseLoggingMixin:
         response = super().finalize_response(request, *args, **kwargs)
         self.info.update({
             'remote_addr': self._get_ip_address(request),
+            'view': self._get_view_name(request),
         })
         self.handle_info()
         return response
@@ -35,3 +36,11 @@ class BaseLoggingMixin:
                 pass
 
         return ipaddr
+
+    def _get_view_name(self, request):
+        method = request.method.lower()
+        try:
+            attribute = getattr(self, method)
+            return type(attribute.__self__).__module__ + "." + type(attribute.__self__).__name__
+        except AttributeError:
+            return None
