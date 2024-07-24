@@ -11,8 +11,6 @@ from .models import Writer
 
 class HomeView(View):
     def get(self, request):
-        if request.user.is_authenticated:
-            return redirect('home:writers')
         return render(request, 'home/home.html')
 
 
@@ -41,6 +39,14 @@ class UserRegisterView(View):
             messages.success(request, 'Wellcome!', extra_tags='success')
             return redirect('home:home')
         return render(request, self.template_name, {'form': form})
+
+
+class WriterDetailView(View):
+    def get(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            # writer = Writer.objects.get(id=kwargs['id'])
+            return render(request, 'home/writer_detail.html')
+        return redirect('home:home')
 
 
 class WriterListView(View):
