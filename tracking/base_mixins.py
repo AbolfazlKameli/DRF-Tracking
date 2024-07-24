@@ -1,22 +1,29 @@
 import ipaddress
 
-from django.utils.timezone import now
+from django.utils.timezone import localtime
 
 from .app_settings import app_settings
 
 
 class BaseLoggingMixin:
     def initial(self, request, *args, **kwargs):
-        self.info = {'requested_at': now()}
+        self.info = {'requested_at': localtime()}
         return super().initial(request, *args, **kwargs)
 
     def finalize_response(self, request, *args, **kwargs):
         response = super().finalize_response(request, *args, **kwargs)
+        user = self._get_user(request)
         self.info.update({
             'remote_addr': self._get_ip_address(request),
             'view': self._get_view_name(request),
             'view_method': self._get_view_method(request),
             'path': self._get_path(request),
+            'host': request.get_host(),
+            'method': request.method,
+            'user': user,
+            'username_persistent': user.get_username() if user else 'AnonymousUser',
+            'response_ms': self._get_response_time(),
+            'status_code': response.status_code,
         })
         self.handle_info()
         return response
@@ -56,3 +63,14 @@ class BaseLoggingMixin:
 
     def _get_path(self, request):
         return request.path[:app_settings.PATH_LENGTH]
+
+    def _get_user(self, request):
+        user = request.user
+        if user.is_anonymous:
+            return None
+        return user
+
+    def _get_response_time(self):
+        response_timedelta = localtime() - self.info['requested_at']
+        response_ms = int(response_timedelta.total_seconds() * 1000)
+        return max(response_ms, 0)
