@@ -11,6 +11,8 @@ from .models import Writer
 
 class HomeView(View):
     def get(self, request):
+        if request.user.is_authenticated:
+            return redirect('home:writers')
         return render(request, 'home/home.html')
 
 

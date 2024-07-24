@@ -1,8 +1,29 @@
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth.models import User
-from django.test import TestCase, Client
+from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
+from model_bakery import baker
 
+from home import views
 from home.forms import RegisterForm
+
+
+class TestHomeView(TestCase):
+    def setUp(self):
+        self.user = baker.make(User, is_active=True)
+        self.factory = RequestFactory()
+
+    def test_authenticated_user(self):
+        request = self.factory.get(reverse('home:home'))
+        request.user = self.user
+        response = views.HomeView.as_view()(request)
+        self.assertEqual(response.status_code, 302)
+
+    def test_user_not_authenticated(self):
+        request = self.factory.get(reverse('home:home'))
+        request.user = AnonymousUser()
+        response = views.HomeView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
 
 
 class TestUserRegisterView(TestCase):
