@@ -1,9 +1,12 @@
 import ipaddress
+import logging
 import traceback
 
 from django.utils.timezone import localtime
 
 from .app_settings import app_settings
+
+logger = logging.getLogger(__name__)
 
 
 class BaseLoggingMixin:
@@ -34,7 +37,10 @@ class BaseLoggingMixin:
                 'response_ms': self._get_response_time(),
                 'status_code': response.status_code,
             })
-            self.handle_info()
+            try:
+                self.handle_info()
+            except Exception:
+                logger.exception('info handler raised this exception!')
         return response
 
     def handle_info(self):
