@@ -28,7 +28,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 LOCAL_APPS = [
-    'home.apps.HomeConfig'
+    'tracking.apps.TrackingConfig',
 ]
 
 THIRD_PARTY_APPS = []
@@ -59,7 +59,7 @@ ROOT_URLCONF = 'DjangoTesting.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
