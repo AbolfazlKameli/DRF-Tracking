@@ -50,7 +50,7 @@ class BaseLoggingMixin:
                 'host': request.get_host(),
                 'method': request.method,
                 'user': user,
-                'username_persistent': user.get_username() if user else 'AnonymousUser',
+                'username_persistent': user.get_username() if user is not None else 'AnonymousUser',
                 'response_ms': self._get_response_time(),
                 'status_code': response.status_code,
                 'query_params': self._clean_data(request.query_params.dict()),
@@ -100,10 +100,7 @@ class BaseLoggingMixin:
         return request.path[:app_settings.PATH_LENGTH]
 
     def _get_user(self, request):
-        user = request.user
-        if user.is_anonymous:
-            return None
-        return user
+        return None if request.user.is_anonymous else request.user
 
     def _get_response_time(self):
         response_timedelta = localtime() - self.info['requested_at']
