@@ -1,4 +1,5 @@
 import ipaddress
+import traceback
 
 from django.utils.timezone import localtime
 
@@ -9,6 +10,11 @@ class BaseLoggingMixin:
     def initial(self, request, *args, **kwargs):
         self.info = {'requested_at': localtime()}
         return super().initial(request, *args, **kwargs)
+
+    def handle_exception(self, exc):
+        response = super().handle_exception(exc)
+        self.info['errors'] = traceback.format_exc()
+        return response
 
     def finalize_response(self, request, *args, **kwargs):
         response = super().finalize_response(request, *args, **kwargs)
