@@ -2,6 +2,8 @@ import ipaddress
 
 from django.utils.timezone import now
 
+from .app_settings import app_settings
+
 
 class BaseLoggingMixin:
     def initial(self, request, *args, **kwargs):
@@ -42,15 +44,15 @@ class BaseLoggingMixin:
     def _get_view_name(self, request):
         method = request.method.lower()
         try:
-            attribute = getattr(self, method)
-            return type(attribute.__self__).__module__ + "." + type(attribute.__self__).__name__
+            attr = getattr(self, method)
+            return (type(attr.__self__).__module__ + "." + type(attr.__self__).__name__)[:app_settings.VIEW_LENGTH]
         except AttributeError:
             return None
 
     def _get_view_method(self, request):
         if hasattr(self, 'action'):
-            return self.action
-        return request.method.lower()
+            return self.action[:app_settings.VIEW_METHOD_LENGTH]
+        return request.method.lower()[:app_settings.VIEW_METHOD_LENGTH]
 
     def _get_path(self, request):
-        return request.path[:200]
+        return request.path[:app_settings.PATH_LENGTH]
