@@ -13,6 +13,8 @@ class BaseLoggingMixin:
         self.info.update({
             'remote_addr': self._get_ip_address(request),
             'view': self._get_view_name(request),
+            'view_method': self._get_view_method(request),
+            'path': self._get_path(request),
         })
         self.handle_info()
         return response
@@ -44,3 +46,11 @@ class BaseLoggingMixin:
             return type(attribute.__self__).__module__ + "." + type(attribute.__self__).__name__
         except AttributeError:
             return None
+
+    def _get_view_method(self, request):
+        if hasattr(self, 'action'):
+            return self.action
+        return request.method.lower()
+
+    def _get_path(self, request):
+        return request.path[:200]
