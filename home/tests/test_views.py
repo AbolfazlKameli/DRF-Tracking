@@ -4,26 +4,19 @@ from django.test import TestCase, Client, RequestFactory
 from django.urls import reverse
 from model_bakery import baker
 
+from home import models
 from home import views
 from home.forms import RegisterForm
 
 
 class TestHomeView(TestCase):
     def setUp(self):
-        self.user = baker.make(User, is_active=True)
-        self.factory = RequestFactory()
+        self.client = Client()
 
-    def test_authenticated_user(self):
-        request = self.factory.get(reverse('home:home'))
-        request.user = self.user
-        response = views.HomeView.as_view()(request)
-        self.assertEqual(response.status_code, 302)
-
-    def test_user_not_authenticated(self):
-        request = self.factory.get(reverse('home:home'))
-        request.user = AnonymousUser()
-        response = views.HomeView.as_view()(request)
+    def test_home_GET(self):
+        response = self.client.get(reverse('home:home'))
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'home/home.html')
 
 
 class TestUserRegisterView(TestCase):
@@ -49,6 +42,24 @@ class TestUserRegisterView(TestCase):
         self.assertEqual(response.status_code, 200)
         self.failIf(response.context['form'].is_valid())
         self.assertFormError(form=response.context['form'], field='email', errors=['Enter a valid email address.'])
+
+
+class TestWriterDetailView(TestCase):
+    def setUp(self):
+        self.user = baker.make(User, is_active=True)
+        self.factory = RequestFactory()
+
+    def test_authenticated_user(self):
+        request = self.factory.get(reverse('home:writer_detail', kwargs={'id': 1}))
+        request.user = self.user
+        response = views.WriterDetailView.as_view()(request)
+        self.assertEqual(response.status_code, 200)
+
+    def test_not_authenticated_user(self):
+        request = self.factory.get(reverse('home:writer_detail', kwargs={'id': 1}))
+        request.user = AnonymousUser()
+        response = views.WriterDetailView.as_view()(request)
+        self.assertEqual(response.status_code, 302)
 
 
 class TestWritersView(TestCase):

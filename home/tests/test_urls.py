@@ -20,3 +20,7 @@ class TestUrls(SimpleTestCase):
     def test_writers_url(self):
         url = reverse('home:writers')
         self.assertEqual(resolve(url).func.view_class, views.WriterListView)
+
+    def test_writer_url(self):
+        url = reverse('home:writer_detail', args=[13])
+        self.assertEqual(resolve(url).func.view_class, views.WriterDetailView)
