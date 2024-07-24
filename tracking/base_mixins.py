@@ -7,6 +7,8 @@ from .app_settings import app_settings
 
 
 class BaseLoggingMixin:
+    logging_methods = '__all__'
+
     def initial(self, request, *args, **kwargs):
         self.info = {'requested_at': localtime()}
         return super().initial(request, *args, **kwargs)
@@ -18,20 +20,21 @@ class BaseLoggingMixin:
 
     def finalize_response(self, request, *args, **kwargs):
         response = super().finalize_response(request, *args, **kwargs)
-        user = self._get_user(request)
-        self.info.update({
-            'remote_addr': self._get_ip_address(request),
-            'view': self._get_view_name(request),
-            'view_method': self._get_view_method(request),
-            'path': self._get_path(request),
-            'host': request.get_host(),
-            'method': request.method,
-            'user': user,
-            'username_persistent': user.get_username() if user else 'AnonymousUser',
-            'response_ms': self._get_response_time(),
-            'status_code': response.status_code,
-        })
-        self.handle_info()
+        if self.should_log(request, response):
+            user = self._get_user(request)
+            self.info.update({
+                'remote_addr': self._get_ip_address(request),
+                'view': self._get_view_name(request),
+                'view_method': self._get_view_method(request),
+                'path': self._get_path(request),
+                'host': request.get_host(),
+                'method': request.method,
+                'user': user,
+                'username_persistent': user.get_username() if user else 'AnonymousUser',
+                'response_ms': self._get_response_time(),
+                'status_code': response.status_code,
+            })
+            self.handle_info()
         return response
 
     def handle_info(self):
@@ -80,3 +83,8 @@ class BaseLoggingMixin:
         response_timedelta = localtime() - self.info['requested_at']
         response_ms = int(response_timedelta.total_seconds() * 1000)
         return max(response_ms, 0)
+
+    def should_log(self, request, response):
+        return (
+                self.logging_methods == '__all__' or request.method in self.logging_methods
+        )
