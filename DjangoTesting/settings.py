@@ -128,7 +128,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # REST framework
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.BrowsableAPIRenderer',
         'rest_framework.renderers.JSONRenderer',
     ],
 }
