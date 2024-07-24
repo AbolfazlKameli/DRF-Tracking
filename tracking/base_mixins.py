@@ -15,8 +15,16 @@ class BaseLoggingMixin:
     sensitive_fields = {}
     CLEANED_SUBSTITUTE = '***************'
 
+    def __init__(self, *args, **kwargs):
+        assert isinstance(self.CLEANED_SUBSTITUTE, str), 'cleaned substitute must be string.'
+        super().__init__(*args, **kwargs)
+
     def initial(self, request, *args, **kwargs):
         self.info = {'requested_at': localtime()}
+        if not getattr(self, 'decode_request_body', app_settings.DECODE_REQUEST_BODY):
+            self.info['data'] = ''
+        else:
+            self.info['data'] = request.data
         return super().initial(request, *args, **kwargs)
 
     def handle_exception(self, exc):
@@ -28,6 +36,12 @@ class BaseLoggingMixin:
         response = super().finalize_response(request, *args, **kwargs)
         if self.should_log(request, response):
             user = self._get_user(request)
+            if response.streaming:
+                rendered_content = None
+            elif hasattr(response, 'rendered_content'):
+                rendered_content = response.rendered_content
+            else:
+                rendered_content = response.getvalue()
             self.info.update({
                 'remote_addr': self._get_ip_address(request),
                 'view': self._get_view_name(request),
@@ -39,7 +53,8 @@ class BaseLoggingMixin:
                 'username_persistent': user.get_username() if user else 'AnonymousUser',
                 'response_ms': self._get_response_time(),
                 'status_code': response.status_code,
-                'query_params': self._clean_data(request.query_params.dict())
+                'query_params': self._clean_data(request.query_params.dict()),
+                'response': self._clean_data(rendered_content)
             })
             try:
                 self.handle_info()
@@ -100,6 +115,12 @@ class BaseLoggingMixin:
         )
 
     def _clean_data(self, data):
+        if isinstance(data, bytes):
+            data = data.decode(errors='replace')
+
+        if isinstance(data, list):
+            return [self._clean_data(d) for d in data]
+
         if isinstance(data, dict):
             SENSITIVE_FIELDS = {'api', 'token', 'key', 'secret', 'password', 'signature'}
             if self.sensitive_fields:

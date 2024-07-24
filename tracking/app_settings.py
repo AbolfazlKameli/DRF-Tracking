@@ -19,5 +19,9 @@ class AppSettings:
     def VIEW_METHOD_LENGTH(self):
         return self._setting('VIEW_METHOD_LENGTH', 200)
 
+    @property
+    def DECODE_REQUEST_BODY(self):
+        return self._setting('DECODE_REQUEST_BODY', True)
+
 
 app_settings = AppSettings('DRF_TRACKING')
