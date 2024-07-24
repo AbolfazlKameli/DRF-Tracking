@@ -6,5 +6,5 @@ from .mixins import LoggingMixin
 
 
 class HomeAPI(LoggingMixin, APIView):
-    def get(self, request):
-        return Response({'message': 'hello'}, status=status.HTTP_200_OK)
+    def post(self, request):
+        return Response(data={'message': 'hello'}, status=status.HTTP_200_OK)

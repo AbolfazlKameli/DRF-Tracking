@@ -91,9 +91,10 @@ class BaseLoggingMixin:
             return None
 
     def _get_view_method(self, request):
+        action = None
         if hasattr(self, 'action'):
-            return self.action[:app_settings.VIEW_METHOD_LENGTH]
-        return request.method.lower()[:app_settings.VIEW_METHOD_LENGTH]
+            action = self.action
+        return request.method.lower(), action
 
     def _get_path(self, request):
         return request.path[:app_settings.PATH_LENGTH]

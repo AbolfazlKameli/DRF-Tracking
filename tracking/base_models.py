@@ -10,7 +10,7 @@ class BaseAPIRequestLog(models.Model):
         null=True
     )
     requested_at = models.DateTimeField(db_index=True)
-    request_ms = models.PositiveIntegerField(default=0)
+    response_ms = models.PositiveIntegerField(default=0)
     path = models.CharField(max_length=getattr(settings, 'DRF_TRACKING_PATH_LENGTH', 200), db_index=True)
     view = models.CharField(max_length=getattr(settings, 'DRF_TRACKING_VIEW_LENGTH', 200), blank=True, null=True)
     view_method = models.CharField(
