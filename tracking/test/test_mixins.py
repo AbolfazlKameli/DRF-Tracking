@@ -1,4 +1,6 @@
 import ast
+import datetime
+from unittest import mock
 
 from django.contrib.auth.models import User
 from django.test import override_settings
@@ -145,3 +147,20 @@ class TestLoggingMixin(APITestCase):
     def test_invalid_cleaned_substitute(self):
         with self.assertRaises(AssertionError):
             self.client.get('/invalid-cleaned-logging/')
+
+    @mock.patch('tracking.models.APIRequestLog.save')
+    def tset_negative_response_ms(self, mock_save):
+        mock_save.side_effect = Exception('database failure')
+        response = self.client.get('/logging/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(APIRequestLog.objects.all().count(), 0)
+
+    @mock.patch('tracking.base_mixins.localtime')
+    def test_negative_response_ms(self, mock_now):
+        mock_now.side_effect = [
+            datetime.datetime(2024, 7, 27, 20, 30),
+            datetime.datetime(2024, 7, 27, 20, 29)
+        ]
+        self.client.get('/logging/')
+        log = APIRequestLog.objects.first()
+        self.assertEqual(log.response_ms, 0)
