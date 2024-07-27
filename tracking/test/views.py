@@ -28,7 +28,7 @@ class MockExplicitLoggingAPI(LoggingMixin, APIView):
 
 class MockCustomCheckLoggingAPI(LoggingMixin, APIView):
     def should_log(self, request, response):
-        return 'log' in response.data
+        return 'log' in response.data['message']
 
     def get(self, request):
         return Response({'message': 'logging'})
